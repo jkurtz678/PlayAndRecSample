@@ -20,7 +20,9 @@ class ViewController: UIViewController {
 	var audioPlayer : AVAudioPlayerNode!
 	var outref: ExtAudioFileRef?
 	var audioFilePlayer: AVAudioPlayerNode!
-	var mixer : AVAudioMixerNode!
+	var playerMixer : AVAudioMixerNode!
+    var recorderMixer : AVAudioMixerNode!
+    var inputNode : AVAudioInputNode!
 	var filePath : String? = nil
 	var isPlay = false
 	var isRec = false
@@ -63,9 +65,13 @@ class ViewController: UIViewController {
 
 		self.audioEngine = AVAudioEngine()
 		self.audioFilePlayer = AVAudioPlayerNode()
-		self.mixer = AVAudioMixerNode()
+		self.playerMixer = AVAudioMixerNode()
+        self.recorderMixer = AVAudioMixerNode()
+
 		self.audioEngine.attach(audioFilePlayer)
-		self.audioEngine.attach(mixer)
+		self.audioEngine.attach(playerMixer)
+        self.audioEngine.attach(recorderMixer)
+        self.inputNode = audioEngine.inputNode
 
 		self.indicator(value: false)
 	}
@@ -90,19 +96,26 @@ class ViewController: UIViewController {
 
 		self.isRec = true
 
-		try! AVAudioSession.sharedInstance().setCategory(AVAudioSessionCategoryPlayAndRecord)
+        try! AVAudioSession.sharedInstance().setCategory(AVAudioSessionCategoryPlayAndRecord, with: [AVAudioSessionCategoryOptions.defaultToSpeaker])
 		try! AVAudioSession.sharedInstance().setActive(true)
 
-		self.audioFile = try! AVAudioFile(forReading: Bundle.main.url(forResource: "1K", withExtension: "mp3")!)
+		self.audioFile = try! AVAudioFile(forReading: Bundle.main.url(forResource: "humble", withExtension: "mp3")!)
+        let sampleRate = self.inputNode.inputFormat(forBus: 0).sampleRate
 
 		let format = AVAudioFormat(commonFormat: AVAudioCommonFormat.pcmFormatInt16,
-			sampleRate: 44100.0,
+			sampleRate: sampleRate,
 			channels: 1,
 			interleaved: true)
-
-		self.audioEngine.connect(self.audioEngine.inputNode, to: self.mixer, format: format)
-		self.audioEngine.connect(self.audioFilePlayer, to: self.mixer, format: self.audioFile.processingFormat)
-		self.audioEngine.connect(self.mixer, to: self.audioEngine.mainMixerNode, format: format)
+        
+        
+        self.audioEngine.connect(self.audioFilePlayer, to: self.playerMixer, format: self.audioFile.processingFormat)
+        
+        let recorderMixerPoint = AVAudioConnectionPoint(node: self.recorderMixer, bus: 0)
+        let outputNodePoint = AVAudioConnectionPoint(node: self.audioEngine.mainMixerNode, bus: 0)
+        
+        self.audioEngine.connect(self.playerMixer, to: [recorderMixerPoint, outputNodePoint], fromBus: 0, format: self.audioFile.processingFormat)
+        
+        self.audioEngine.connect(inputNode, to: self.recorderMixer, format: format)
 
 		self.audioFilePlayer.scheduleSegment(audioFile,
 			startingFrame: AVAudioFramePosition(0),
@@ -120,7 +133,7 @@ class ViewController: UIViewController {
 			AudioFileFlags.eraseFile.rawValue,
 			&outref)
 
-		self.mixer.installTap(onBus: 0, bufferSize: AVAudioFrameCount((format?.sampleRate)! * 0.4), format: format, block: { (buffer: AVAudioPCMBuffer!, time: AVAudioTime!) -> Void in
+		self.recorderMixer.installTap(onBus: 0, bufferSize: AVAudioFrameCount((format?.sampleRate)! * 0.4), format: format, block: { (buffer: AVAudioPCMBuffer!, time: AVAudioTime!) -> Void in
 
 			let audioBuffer : AVAudioBuffer = buffer
 			_ = ExtAudioFileWrite(self.outref!, buffer.frameLength, audioBuffer.audioBufferList)
@@ -134,7 +147,7 @@ class ViewController: UIViewController {
 		self.isRec = false
 		self.audioFilePlayer.stop()
 		self.audioEngine.stop()
-		self.mixer.removeTap(onBus: 0)
+		self.recorderMixer.removeTap(onBus: 0)
 		ExtAudioFileDispose(self.outref!)
 		try! AVAudioSession.sharedInstance().setActive(false)
 	}

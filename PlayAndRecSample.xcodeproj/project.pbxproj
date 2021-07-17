@@ -99,7 +99,7 @@
 				TargetAttributes = {
 					3247379C1E67C62300F98728 = {
 						CreatedOnToolsVersion = 8.2.1;
-						DevelopmentTeam = LPMD2DMU36;
+						DevelopmentTeam = 64548X6W8H;
 						LastSwiftMigration = 0900;
 						ProvisioningStyle = Automatic;
 					};
@@ -110,6 +110,7 @@
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
 			knownRegions = (
+				English,
 				en,
 				Base,
 			);
@@ -276,7 +277,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				DEVELOPMENT_TEAM = LPMD2DMU36;
+				DEVELOPMENT_TEAM = 64548X6W8H;
 				INFOPLIST_FILE = PlayAndRecSample/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = fm.blunder.PlayAndRecSample;
@@ -290,7 +291,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				DEVELOPMENT_TEAM = LPMD2DMU36;
+				DEVELOPMENT_TEAM = 64548X6W8H;
 				INFOPLIST_FILE = PlayAndRecSample/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = fm.blunder.PlayAndRecSample;
