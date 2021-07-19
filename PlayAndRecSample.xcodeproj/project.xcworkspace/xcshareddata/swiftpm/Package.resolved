@@ -1,0 +1,16 @@
+{
+  "object": {
+    "pins": [
+      {
+        "package": "AudioStreamer",
+        "repositoryURL": "https://github.com/jkurtz678/AudioStreamer",
+        "state": {
+          "branch": "master",
+          "revision": "804ce5f6c24ac98f40b174b1ad61e4b35e0f173c",
+          "version": null
+        }
+      }
+    ]
+  },
+  "version": 1
+}

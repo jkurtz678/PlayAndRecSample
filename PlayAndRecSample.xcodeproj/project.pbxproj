@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 46;
+	objectVersion = 52;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -13,6 +13,7 @@
 		324737A81E67C62300F98728 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 324737A71E67C62300F98728 /* Assets.xcassets */; };
 		324737AB1E67C62300F98728 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 324737A91E67C62300F98728 /* LaunchScreen.storyboard */; };
 		DCE104DD26A520C8001BC157 /* humble.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = DCE104DC26A520C8001BC157 /* humble.mp3 */; };
+		DCE104E026A5214C001BC157 /* AudioStreamer-iOS in Frameworks */ = {isa = PBXBuildFile; productRef = DCE104DF26A5214C001BC157 /* AudioStreamer-iOS */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -31,6 +32,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				DCE104E026A5214C001BC157 /* AudioStreamer-iOS in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -83,6 +85,9 @@
 			dependencies = (
 			);
 			name = PlayAndRecSample;
+			packageProductDependencies = (
+				DCE104DF26A5214C001BC157 /* AudioStreamer-iOS */,
+			);
 			productName = PlayAndRecSample;
 			productReference = 3247379D1E67C62300F98728 /* PlayAndRecSample.app */;
 			productType = "com.apple.product-type.application";
@@ -115,6 +120,9 @@
 				Base,
 			);
 			mainGroup = 324737941E67C62300F98728;
+			packageReferences = (
+				DCE104DE26A5214C001BC157 /* XCRemoteSwiftPackageReference "AudioStreamer" */,
+			);
 			productRefGroup = 3247379E1E67C62300F98728 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -268,7 +276,8 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 10.2;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				SDKROOT = iphoneos;
-				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				VALIDATE_PRODUCT = YES;
 			};
 			name = Release;
@@ -279,7 +288,10 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				DEVELOPMENT_TEAM = 64548X6W8H;
 				INFOPLIST_FILE = PlayAndRecSample/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = fm.blunder.PlayAndRecSample;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_SWIFT3_OBJC_INFERENCE = On;
@@ -293,7 +305,10 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				DEVELOPMENT_TEAM = 64548X6W8H;
 				INFOPLIST_FILE = PlayAndRecSample/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = fm.blunder.PlayAndRecSample;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_SWIFT3_OBJC_INFERENCE = On;
@@ -323,6 +338,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		DCE104DE26A5214C001BC157 /* XCRemoteSwiftPackageReference "AudioStreamer" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/jkurtz678/AudioStreamer";
+			requirement = {
+				branch = master;
+				kind = branch;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		DCE104DF26A5214C001BC157 /* AudioStreamer-iOS */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = DCE104DE26A5214C001BC157 /* XCRemoteSwiftPackageReference "AudioStreamer" */;
+			productName = "AudioStreamer-iOS";
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 324737951E67C62300F98728 /* Project object */;
 }

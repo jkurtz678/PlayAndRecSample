@@ -11,15 +11,21 @@ import UIKit
 import UIKit
 import AVFoundation
 import AudioToolbox
+import AudioStreamer
+
+class NodeStreamer: Streamer {
+    override func attachNodes() {}
+    override func connectNodes() {}
+}
 
 class ViewController: UIViewController {
 
 	@IBOutlet weak var indicatorView: UIActivityIndicatorView!
 	var audioEngine : AVAudioEngine!
-	var audioFile : AVAudioFile!
-	var audioPlayer : AVAudioPlayerNode!
+	//var audioFile : AVAudioFile!
 	var outref: ExtAudioFileRef?
-	var audioFilePlayer: AVAudioPlayerNode!
+    //var audioFilePlayer: AVAudioPlayerNode!
+    var streamer: NodeStreamer!
 	var playerMixer : AVAudioMixerNode!
     var recorderMixer : AVAudioMixerNode!
     var inputNode : AVAudioInputNode!
@@ -62,17 +68,22 @@ class ViewController: UIViewController {
 
 	override func viewDidLoad() {
 		super.viewDidLoad()
-
-		self.audioEngine = AVAudioEngine()
-		self.audioFilePlayer = AVAudioPlayerNode()
+                
+        self.streamer = NodeStreamer()
+        self.audioEngine = self.streamer.engine
 		self.playerMixer = AVAudioMixerNode()
         self.recorderMixer = AVAudioMixerNode()
 
-		self.audioEngine.attach(audioFilePlayer)
+        self.audioEngine.attach(streamer.playerNode)
 		self.audioEngine.attach(playerMixer)
         self.audioEngine.attach(recorderMixer)
         self.inputNode = audioEngine.inputNode
 
+        streamer.url = URL(string: "https://firebasestorage.googleapis.com/v0/b/showeroke.appspot.com/o/backing_tracks%2Fhumble.mp3?alt=media&token=aaacc8f6-2815-4924-b6bd-e7c7cabc82cf")
+        
+        try! AVAudioSession.sharedInstance().setCategory(AVAudioSessionCategoryPlayAndRecord, with: [AVAudioSessionCategoryOptions.defaultToSpeaker])
+        try! AVAudioSession.sharedInstance().setActive(true)
+        
 		self.indicator(value: false)
 	}
 
@@ -96,10 +107,10 @@ class ViewController: UIViewController {
 
 		self.isRec = true
 
-        try! AVAudioSession.sharedInstance().setCategory(AVAudioSessionCategoryPlayAndRecord, with: [AVAudioSessionCategoryOptions.defaultToSpeaker])
-		try! AVAudioSession.sharedInstance().setActive(true)
+//        try! AVAudioSession.sharedInstance().setCategory(AVAudioSessionCategoryPlayAndRecord, with: [AVAudioSessionCategoryOptions.defaultToSpeaker])
+//		try! AVAudioSession.sharedInstance().setActive(true)
 
-		self.audioFile = try! AVAudioFile(forReading: Bundle.main.url(forResource: "humble", withExtension: "mp3")!)
+		//self.audioFile = try! AVAudioFile(forReading: Bundle.main.url(forResource: "humble", withExtension: "mp3")!)
         let sampleRate = self.inputNode.inputFormat(forBus: 0).sampleRate
 
 		let format = AVAudioFormat(commonFormat: AVAudioCommonFormat.pcmFormatInt16,
@@ -108,20 +119,20 @@ class ViewController: UIViewController {
 			interleaved: true)
         
         
-        self.audioEngine.connect(self.audioFilePlayer, to: self.playerMixer, format: self.audioFile.processingFormat)
+        self.audioEngine.connect(self.streamer.playerNode, to: self.playerMixer, format: self.streamer.readFormat)
         
         let recorderMixerPoint = AVAudioConnectionPoint(node: self.recorderMixer, bus: 0)
         let outputNodePoint = AVAudioConnectionPoint(node: self.audioEngine.mainMixerNode, bus: 0)
         
-        self.audioEngine.connect(self.playerMixer, to: [recorderMixerPoint, outputNodePoint], fromBus: 0, format: self.audioFile.processingFormat)
+        self.audioEngine.connect(self.playerMixer, to: [recorderMixerPoint, outputNodePoint], fromBus: 0, format: self.streamer.readFormat)
         
         self.audioEngine.connect(inputNode, to: self.recorderMixer, format: format)
 
-		self.audioFilePlayer.scheduleSegment(audioFile,
-			startingFrame: AVAudioFramePosition(0),
-			frameCount: AVAudioFrameCount(self.audioFile.length),
-			at: nil,
-			completionHandler: self.completion)
+//		self.audioFilePlayer.scheduleSegment(audioFile,
+//			startingFrame: AVAudioFramePosition(0),
+//			frameCount: AVAudioFrameCount(self.audioFile.length),
+//			at: nil,
+//			completionHandler: self.completion)
 
 		let dir = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true).first! as String
 		self.filePath =  dir.appending("/temp.wav")
@@ -140,12 +151,13 @@ class ViewController: UIViewController {
 		})
 
 		try! self.audioEngine.start()
-		self.audioFilePlayer.play()
+        print("BEFORE PLAY")
+		self.streamer.play()
 	}
 
 	func stopRecord() {
 		self.isRec = false
-		self.audioFilePlayer.stop()
+		self.streamer.stop()
 		self.audioEngine.stop()
 		self.recorderMixer.removeTap(onBus: 0)
 		ExtAudioFileDispose(self.outref!)
@@ -163,26 +175,27 @@ class ViewController: UIViewController {
 		try! AVAudioSession.sharedInstance().setCategory(AVAudioSessionCategoryPlayback)
 		try! AVAudioSession.sharedInstance().setActive(true)
 
-		self.audioFile = try! AVAudioFile(forReading: URL(fileURLWithPath: self.filePath!))
+		//self.audioFile = try! AVAudioFile(forReading: URL(fileURLWithPath: self.filePath!))
+        streamer.url = URL(fileURLWithPath: self.filePath!)
+		
+        self.audioEngine.connect(self.streamer.playerNode, to: self.audioEngine.mainMixerNode, format: streamer.readFormat)
 
-		self.audioEngine.connect(self.audioFilePlayer, to: self.audioEngine.mainMixerNode, format: audioFile.processingFormat)
-
-		self.audioFilePlayer.scheduleSegment(audioFile,
-			startingFrame: AVAudioFramePosition(0),
-			frameCount: AVAudioFrameCount(self.audioFile.length),
-			at: nil,
-			completionHandler: self.completion)
+//		self.audioFilePlayer.scheduleSegment(audioFile,
+//			startingFrame: AVAudioFramePosition(0),
+//			frameCount: AVAudioFrameCount(self.audioFile.length),
+//			at: nil,
+//			completionHandler: self.completion)
 
 		try! self.audioEngine.start()
-		self.audioFilePlayer.play()
+		self.streamer.play()
 
 		return true
 	}
 	
 	func stopPlay() {
 		self.isPlay = false
-		if self.audioFilePlayer != nil && self.audioFilePlayer.isPlaying {
-			self.audioFilePlayer.stop()
+        if  self.streamer.playerNode.isPlaying {
+			self.streamer.stop()
 		}
 		self.audioEngine.stop()
 		try! AVAudioSession.sharedInstance().setActive(false)
