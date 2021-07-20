@@ -74,6 +74,13 @@ class ViewController: UIViewController {
         self.inputNode = audioEngine.inputNode
 
 		self.indicator(value: false)
+        let url = URL(string: "https://firebasestorage.googleapis.com/v0/b/showeroke.appspot.com/o/backing_tracks%2Fstronger.mp3?alt=media&token=126b0c51-83c3-45aa-b5b2-554d40c77fb8")!
+        
+        let task = URLSession.shared.downloadTask(with: url) { localURL, urlResponse, error in
+            self.audioFile = try! AVAudioFile(forReading: localURL!)
+        }
+
+        task.resume()
 	}
 
 	override func viewWillAppear(_ animated: Bool) {
@@ -99,7 +106,7 @@ class ViewController: UIViewController {
         try! AVAudioSession.sharedInstance().setCategory(AVAudioSessionCategoryPlayAndRecord, with: [AVAudioSessionCategoryOptions.defaultToSpeaker])
 		try! AVAudioSession.sharedInstance().setActive(true)
 
-		self.audioFile = try! AVAudioFile(forReading: Bundle.main.url(forResource: "humble", withExtension: "mp3")!)
+		
         let sampleRate = self.inputNode.inputFormat(forBus: 0).sampleRate
 
 		let format = AVAudioFormat(commonFormat: AVAudioCommonFormat.pcmFormatInt16,
